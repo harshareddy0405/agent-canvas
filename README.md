@@ -22,6 +22,8 @@ Build multi-agent architectures, tune runtime behavior, simulate execution, and 
 > [!IMPORTANT]
 > Agent Canvas is a deterministic browser **simulation** and architecture-design prototype. It makes no LLM, agent, tool, API, or network calls. Models and token counts shown in the interface are editable design metadata and synthetic run telemetry.
 
+[Open the live studio ↗](https://harshareddy0405.github.io/agent-canvas/) · [Engineering notes](docs/ENGINEERING.md) · [Quality checks](https://github.com/harshareddy0405/agent-canvas/actions)
+
 ## Why Agent Canvas?
 
 Agent systems become difficult to reason about the moment they grow beyond a prompt and a tool call. Agent Canvas makes the invisible visible: triggers, reasoning steps, tools, memory, routing logic, and outputs live together on one editable canvas.
