@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+node_modules/
+dist/
+coverage/
+node_modules/
+coverage/
+.env
+.env.*
+*.recovery

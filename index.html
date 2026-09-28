@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Agent Canvas is a visual workspace for designing, simulating, and exporting portable AI agent workflows."
+    />
+    <meta name="theme-color" content="#0b0b10" />
+    <title>Agent Canvas — Visual AI workflow designer</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%237c5cff%22/><path d=%22M18 40 29 18l7 14 10-7-8 21-7-13z%22 fill=%22white%22/></svg>"
+    />
+    <link rel="stylesheet" href="styles.css?v=2" />
+    <link rel="stylesheet" href="quality.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#canvas-stage">Skip to workflow canvas</a>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Agent Canvas home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path
+                d="m8.7 21.4 5.5-12 3.3 7.5 5.8-4.1-4.7 10.6-3.7-6.8-6.2 4.8Z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>Agent Canvas</strong>
+            <small>Workflow studio</small>
+          </span>
+        </div>
+
+        <div class="project-identity">
+          <label class="sr-only" for="project-name">Project name</label>
+          <input
+            id="project-name"
+            class="project-name"
+            value="Customer Intelligence Flow"
+            maxlength="52"
+          />
+          <span class="save-status" id="save-status" role="status">
+            <span class="save-dot" aria-hidden="true"></span>
+            Saved locally
+          </span>
+        </div>
+
+        <div class="topbar-actions">
+          <button
+            class="icon-button"
+            id="theme-toggle"
+            type="button"
+            aria-label="Switch to light theme"
+            title="Toggle theme"
+          >
+            <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M20.2 15.1A8.2 8.2 0 0 1 8.9 3.8 8.6 8.6 0 1 0 20.2 15Z"
+              />
+            </svg>
+          </button>
+          <button
+            class="button secondary desktop-only"
+            id="export-button"
+            type="button"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v5h14v-5" />
+            </svg>
+            Export
+          </button>
+          <button class="button primary" id="run-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m8 5 11 7-11 7V5Z" />
+            </svg>
+            Run flow
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="library-panel panel" aria-label="Workflow library">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">Build</span>
+              <h1>Components</h1>
+            </div>
+            <button
+              class="icon-button mobile-panel-close"
+              type="button"
+              data-close-panel="library"
+              aria-label="Close component library"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+
+          <label class="search-box" for="component-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m16 16 5 5" />
+            </svg>
+            <input
+              id="component-search"
+              type="search"
+              placeholder="Search components"
+              autocomplete="off"
+            />
+            <kbd>/</kbd>
+          </label>
+
+          <div
+            class="segmented-control"
+            role="tablist"
+            aria-label="Library sections"
+          >
+            <button
+              id="nodes-tab"
+              class="active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="nodes-panel"
+            >
+              Nodes
+            </button>
+            <button
+              id="templates-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="templates-panel"
+            >
+              Blueprints
+            </button>
+          </div>
+
+          <section
+            id="nodes-panel"
+            class="library-section"
+            role="tabpanel"
+            aria-labelledby="nodes-tab"
+          >
+            <p class="section-help">
+              Drag a component onto the canvas, or click to add it.
+            </p>
+            <div class="component-list" id="component-list"></div>
+          </section>
+
+          <section
+            id="templates-panel"
+            class="library-section"
+            role="tabpanel"
+            aria-labelledby="templates-tab"
+            hidden
+          >
+            <p class="section-help">Start with a proven multi-agent pattern.</p>
+            <div class="template-list" id="template-list"></div>
+          </section>
+
+          <div class="library-tip">
+            <span class="tip-icon" aria-hidden="true">✦</span>
+            <div>
+              <strong>Pro tip</strong>
+              <p>Connect nodes by clicking an output dot, then an input dot.</p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="canvas-section" aria-label="Workflow editor">
+          <div class="canvas-toolbar" aria-label="Canvas controls">
+            <div class="toolbar-group">
+              <button
+                class="toolbar-button mobile-only"
+                id="open-library"
+                type="button"
+                aria-label="Open component library"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v5H4zM14 15h6v5h-6z"
+                  />
+                </svg>
+              </button>
+              <button
+                class="toolbar-button"
+                id="undo-button"
+                type="button"
+                aria-label="Undo"
+                title="Undo (⌘Z)"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 7-5 5 5 5M5 12h8a6 6 0 0 1 6 6" />
+                </svg>
+              </button>
+              <button
+                class="toolbar-button"
+                id="redo-button"
+                type="button"
+                aria-label="Redo"
+                title="Redo (⇧⌘Z)"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m15 7 5 5-5 5m4-5h-8a6 6 0 0 0-6 6" />
+                </svg>
+              </button>
+            </div>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <div class="toolbar-group">
+              <button
+                class="toolbar-button connect-button"
+                id="connect-button"
+                type="button"
+                aria-pressed="false"
+                title="Connect nodes"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="6" cy="6" r="2.5" />
+                  <circle cx="18" cy="18" r="2.5" />
+                  <path d="M8 7.5c5 1 3 6 8 8" />
+                </svg>
+                <span>Connect</span>
+              </button>
+              <button
+                class="toolbar-button"
+                id="auto-layout-button"
+                type="button"
+                title="Auto-arrange nodes"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="6" height="5" rx="1" />
+                  <rect x="15" y="14" width="6" height="5" rx="1" />
+                  <path d="M9 7.5h5a4 4 0 0 1 4 4V14" />
+                </svg>
+                <span class="desktop-only">Arrange</span>
+              </button>
+            </div>
+            <span class="toolbar-spacer"></span>
+            <div class="zoom-controls" aria-label="Zoom controls">
+              <button id="zoom-out" type="button" aria-label="Zoom out">
+                −
+              </button>
+              <output id="zoom-label" aria-live="polite">100%</output>
+              <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+            </div>
+            <button
+              class="toolbar-button mobile-only"
+              id="open-inspector"
+              type="button"
+              aria-label="Open inspector"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-6 2v4" />
+              </svg>
+            </button>
+          </div>
+
+          <div
+            class="canvas-stage"
+            id="canvas-stage"
+            tabindex="0"
+            aria-label="Agent workflow canvas. Use arrow keys to move a selected node."
+          >
+            <div class="canvas-empty" id="canvas-empty" hidden>
+              <span class="empty-orbit" aria-hidden="true"
+                ><i></i><i></i><i></i
+              ></span>
+              <h2>Build your first agent flow</h2>
+              <p>Drag in a component or launch a blueprint to begin.</p>
+              <button
+                class="button primary"
+                id="empty-add-button"
+                type="button"
+              >
+                Add an AI agent
+              </button>
+            </div>
+            <div class="canvas-world" id="canvas-world">
+              <svg
+                class="edge-layer"
+                id="edge-layer"
+                width="1600"
+                height="1000"
+                aria-hidden="true"
+              >
+                <defs>
+                  <marker
+                    id="arrow"
+                    markerWidth="8"
+                    markerHeight="8"
+                    refX="7"
+                    refY="4"
+                    orient="auto"
+                    markerUnits="strokeWidth"
+                  >
+                    <path d="M0,0 L8,4 L0,8 z" fill="context-stroke" />
+                  </marker>
+                  <filter
+                    id="edge-glow"
+                    x="-40%"
+                    y="-40%"
+                    width="180%"
+                    height="180%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+              </svg>
+              <div class="node-layer" id="node-layer"></div>
+            </div>
+            <div class="minimap" id="minimap" aria-label="Workflow minimap">
+              <span class="minimap-label">Map</span>
+              <div id="minimap-nodes"></div>
+            </div>
+            <div
+              class="connection-hint"
+              id="connection-hint"
+              role="status"
+              hidden
+            >
+              <span class="pulse-dot"></span>
+              Select a target input
+              <button id="cancel-connect" type="button">Cancel</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector-panel panel" aria-label="Node inspector">
+          <div class="panel-heading inspector-heading">
+            <div>
+              <span class="eyebrow">Configure</span>
+              <h2>Inspector</h2>
+            </div>
+            <div class="heading-actions">
+              <button
+                class="icon-button"
+                id="duplicate-node"
+                type="button"
+                aria-label="Duplicate selected node"
+                title="Duplicate node"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="8" y="8" width="11" height="11" rx="2" />
+                  <path d="M16 8V5H5v11h3" />
+                </svg>
+              </button>
+              <button
+                class="icon-button mobile-panel-close"
+                type="button"
+                data-close-panel="inspector"
+                aria-label="Close inspector"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="inspector-empty" id="inspector-empty">
+            <span class="inspector-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M11 11h26v26H11z" />
+                <path d="M17 17h14M17 24h9M17 31h12" />
+              </svg>
+            </span>
+            <h3>Select a node</h3>
+            <p>Fine-tune its model, instructions, and runtime behavior.</p>
+          </div>
+
+          <form class="inspector-form" id="inspector-form" hidden>
+            <div class="selected-node-banner">
+              <span id="inspector-node-icon" class="node-type-icon"></span>
+              <div>
+                <strong id="inspector-node-type">AI agent</strong
+                ><small id="inspector-node-id">node_01</small>
+              </div>
+              <span class="status-pill"><i></i> Ready</span>
+            </div>
+
+            <fieldset>
+              <legend>Identity</legend>
+              <label class="field-label" for="node-label">Display name</label>
+              <input
+                class="field-control"
+                id="node-label"
+                name="label"
+                maxlength="40"
+              />
+              <label class="field-label" for="node-type">Component type</label>
+              <select class="field-control" id="node-type" name="type"></select>
+            </fieldset>
+
+            <fieldset>
+              <legend>Intelligence</legend>
+              <label class="field-label" for="node-model">Model</label>
+              <select class="field-control" id="node-model" name="model">
+                <option value="gpt-4.1">GPT-4.1</option>
+                <option value="gpt-4.1-mini">GPT-4.1 mini</option>
+                <option value="claude-3.7-sonnet">Claude 3.7 Sonnet</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                <option value="local-runtime">Local runtime</option>
+              </select>
+              <label class="field-label" for="node-prompt"
+                >System instructions</label
+              >
+              <textarea
+                class="field-control"
+                id="node-prompt"
+                name="prompt"
+                rows="6"
+                maxlength="800"
+              ></textarea>
+              <div class="field-row range-row">
+                <label class="field-label" for="node-temperature"
+                  >Creativity</label
+                >
+                <output id="temperature-value">0.4</output>
+              </div>
+              <input
+                id="node-temperature"
+                name="temperature"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value="0.4"
+              />
+            </fieldset>
+
+            <fieldset>
+              <legend>Runtime</legend>
+              <label class="toggle-row" for="node-memory">
+                <span
+                  ><strong>Conversation memory</strong
+                  ><small>Carry context between steps</small></span
+                >
+                <input
+                  id="node-memory"
+                  name="memory"
+                  type="checkbox"
+                  role="switch"
+                />
+              </label>
+              <label class="toggle-row" for="node-stream">
+                <span
+                  ><strong>Stream responses</strong
+                  ><small>Emit tokens as they arrive</small></span
+                >
+                <input
+                  id="node-stream"
+                  name="stream"
+                  type="checkbox"
+                  role="switch"
+                />
+              </label>
+              <label class="field-label" for="node-retries">Retry policy</label>
+              <select class="field-control" id="node-retries" name="retries">
+                <option value="0">No retries</option>
+                <option value="1">Retry once</option>
+                <option value="2">Retry twice</option>
+                <option value="3">Retry three times</option>
+              </select>
+            </fieldset>
+
+            <button class="danger-button" id="delete-node" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5" />
+              </svg>
+              Delete component
+            </button>
+          </form>
+        </aside>
+      </main>
+    </div>
+
+    <section
+      class="run-drawer"
+      id="run-drawer"
+      aria-label="Simulation console"
+      aria-hidden="true"
+    >
+      <header class="run-drawer-header">
+        <div class="run-title">
+          <span class="run-status-icon"><i></i></span>
+          <div>
+            <strong>Flow simulation</strong
+            ><small id="run-summary">Waiting to start</small>
+          </div>
+        </div>
+        <div class="run-metrics" aria-label="Run metrics">
+          <span
+            ><small>Duration</small
+            ><strong id="metric-duration">—</strong></span
+          >
+          <span
+            ><small>Steps</small><strong id="metric-steps">0 / 0</strong></span
+          >
+          <span
+            ><small>Tokens</small><strong id="metric-tokens">—</strong></span
+          >
+        </div>
+        <button
+          class="icon-button"
+          id="close-run-drawer"
+          type="button"
+          aria-label="Close simulation console"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </header>
+      <div class="run-log" id="run-log" aria-live="polite"></div>
+      <footer class="run-footer">
+        <span id="run-footer-status">Ready to simulate with sample data</span>
+        <button class="button secondary" id="stop-run" type="button" disabled>
+          Stop
+        </button>
+        <button class="button primary" id="rerun-button" type="button">
+          Start simulation
+        </button>
+      </footer>
+    </section>
+
+    <dialog class="export-dialog" id="export-dialog">
+      <form method="dialog" class="dialog-card">
+        <header class="dialog-header">
+          <div>
+            <span class="eyebrow">Ship it</span>
+            <h2>Export workflow</h2>
+            <p>Portable JSON for your runtime or version control.</p>
+          </div>
+          <button
+            class="icon-button"
+            value="cancel"
+            aria-label="Close export dialog"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </header>
+        <div class="export-preview">
+          <div class="code-toolbar">
+            <span><i></i><i></i><i></i></span><code>agent-canvas.json</code>
+          </div>
+          <pre id="export-code" tabindex="0"></pre>
+        </div>
+        <div class="dialog-actions">
+          <label class="button secondary import-label">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20V8m0 0-4 4m4-4 4 4M5 9V4h14v5" />
+            </svg>
+            Import JSON
+            <input
+              id="import-input"
+              type="file"
+              accept="application/json,.json"
+            />
+          </label>
+          <span class="dialog-spacer"></span>
+          <button class="button secondary" id="copy-json" type="button">
+            Copy JSON
+          </button>
+          <button class="button primary" id="download-json" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 15v5h14v-5" />
+            </svg>
+            Download
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div
+      class="toast-region"
+      id="toast-region"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <div class="mobile-scrim" id="mobile-scrim" hidden></div>
+
+    <script src="storage.js"></script>
+    <script src="schema.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>
